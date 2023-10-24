@@ -6,11 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -18,7 +13,7 @@ def register():
     new_user = User(
         first_name=data['first_name'],
         last_name=data['last_name'],
-        user_type=data['user_type'],
+        user_type="administrator",
         password=hashed_password
     )
     db.session.add(new_user)
