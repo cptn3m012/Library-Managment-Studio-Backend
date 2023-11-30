@@ -1,6 +1,7 @@
 # Modele definiują strukturę tabel w bazie danych oraz relacje między nimi.
 from datetime import datetime
 from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Role(db.Model):
@@ -23,6 +24,13 @@ class User(db.Model):
     employees = db.relationship('Employee', backref='user', lazy=True)
     notifications = db.relationship('Notification', backref='user', lazy=True)
     reports = db.relationship('Report', backref='user', lazy=True)
+
+    #Metody
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 class Employee(db.Model):
@@ -51,11 +59,23 @@ class Category(db.Model):
     books = db.relationship('Book', backref='category', lazy=True)
 
 
+class Author(db.Model):
+    __tablename__ = 'authors'
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    biography = db.Column(db.Text)
+    birth_date = db.Column(db.Date)
+
+    # Relacje
+    books = db.relationship('Book', backref='author', lazy=True)
+
+
 class Book(db.Model):
     __tablename__ = 'books'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False, index=True)
-    author = db.Column(db.String(255), nullable=False, index=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
     isbn = db.Column(db.String(20), index=True)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     status = db.Column(db.String(50), default='Available')
@@ -66,7 +86,6 @@ class Book(db.Model):
     #Relacje
     loans = db.relationship('Loan', backref='book', lazy=True)
     reservations = db.relationship('Reservation', backref='book', lazy=True)
-    reviews = db.relationship('Review', backref='book', lazy=True)
 
 
 class Borrower(db.Model):
