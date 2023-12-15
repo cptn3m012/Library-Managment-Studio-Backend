@@ -1,4 +1,4 @@
-# Modele definiują strukturę tabel w bazie danych oraz relacje między nimi.
+# Modele definiują strukturę tabel w bazie danych oraz relacje między nimi
 from datetime import datetime
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -54,7 +54,6 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text)
 
     #Relacje
     books = db.relationship('Book', backref='category', lazy=True)
@@ -65,29 +64,32 @@ class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
-    biography = db.Column(db.Text)
-    birth_date = db.Column(db.Date)
 
-    # Relacje
-    books = db.relationship('Book', backref='author', lazy=True)
+
+# Tabela asocjacyjna dla relacji książka-autor
+book_author = db.Table('book_author',
+    db.Column('book_id', db.Integer, db.ForeignKey('books.id'), primary_key=True),
+    db.Column('author_id', db.Integer, db.ForeignKey('authors.id'), primary_key=True)
+)
 
 
 class Book(db.Model):
     __tablename__ = 'books'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False, index=True)
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'))
-    image = db.Column(db.LargeBinary)
     isbn = db.Column(db.String(20), index=True)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     status = db.Column(db.String(50), default='Available')
     description = db.Column(db.Text)
+    quantity = db.Column(db.Integer, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     #Relacje
     loans = db.relationship('Loan', backref='book', lazy=True)
     reservations = db.relationship('Reservation', backref='book', lazy=True)
+    # Relacja wielu-do-wielu z Author
+    authors = db.relationship('Author', secondary=book_author, backref=db.backref('books', lazy='dynamic'))
 
 
 class Borrower(db.Model):
