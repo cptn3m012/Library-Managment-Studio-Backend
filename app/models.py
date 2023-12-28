@@ -9,7 +9,7 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role_name = db.Column(db.String(255), nullable=False)
 
-    #Relacje
+    # Relacje
     users = db.relationship('User', backref='role', lazy=True)
 
 
@@ -20,12 +20,12 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
-    #Relacje
+    # Relacje
     employees = db.relationship('Employee', backref='user', lazy=True)
     notifications = db.relationship('Notification', backref='user', lazy=True)
     reports = db.relationship('Report', backref='user', lazy=True)
 
-    #Metody
+    # Metody
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
@@ -46,7 +46,7 @@ class Employee(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    #Relacje
+    # Relacje
     loans = db.relationship('Loan', backref='employee', lazy=True)
 
 
@@ -55,7 +55,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
 
-    #Relacje
+    # Relacje
     books = db.relationship('Book', backref='category', lazy=True)
 
 
@@ -68,9 +68,9 @@ class Author(db.Model):
 
 # Tabela asocjacyjna dla relacji książka-autor
 book_author = db.Table('book_author',
-    db.Column('book_id', db.Integer, db.ForeignKey('books.id'), primary_key=True),
-    db.Column('author_id', db.Integer, db.ForeignKey('authors.id'), primary_key=True)
-)
+                       db.Column('book_id', db.Integer, db.ForeignKey('books.id'), primary_key=True),
+                       db.Column('author_id', db.Integer, db.ForeignKey('authors.id'), primary_key=True)
+                       )
 
 
 class Book(db.Model):
@@ -86,7 +86,7 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    #Relacje
+    # Relacje
     loans = db.relationship('Loan', backref='book', lazy=True)
     reservations = db.relationship('Reservation', backref='book', lazy=True)
     # Relacja wielu-do-wielu z Author
@@ -107,7 +107,7 @@ class Borrower(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    #Relacje
+    # Relacje
     loans = db.relationship('Loan', backref='borrower', lazy=True)
     reservations = db.relationship('Reservation', backref='borrower', lazy=True)
 
@@ -117,41 +117,11 @@ class Loan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
     borrower_id = db.Column(db.Integer, db.ForeignKey('borrowers.id'))
-    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'))
     loan_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime)
     status = db.Column(db.String(50), default='Wypożyczona')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-class Reservation(db.Model):
-    __tablename__ = 'reservations'
-    id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
-    borrower_id = db.Column(db.Integer, db.ForeignKey('borrowers.id'))
-    reservation_date = db.Column(db.DateTime, nullable=False)
-    status = db.Column(db.String(50), default='Active')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-class Notification(db.Model):
-    __tablename__ = 'notifications'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    message = db.Column(db.Text)
-    status = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-class Report(db.Model):
-    __tablename__ = 'reports'
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(255), nullable=False)
-    generated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class LoanHistory(db.Model):
